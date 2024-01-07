@@ -1,3 +1,4 @@
+import { generateIsland } from "World/WorldGen";
 import RenderFrame, { BoundingBox, FrameChange, FramePixel } from "./RenderFrame";
 
 export default class World {
@@ -17,19 +18,34 @@ export default class World {
     getGraphics(): FrameChange {
         const height = this.renderFrame.height;
         const width = this.renderFrame.width;
-        const topLine = Math.floor(height / 2) - 4;
-        const bottomLine = Math.floor(height / 2) + 4;
         const world: FramePixel[][] = [];
         for (let y = 0; y < height; y++) {
             const line: FramePixel[] = [];
             for (let x = 0; x < width; x++) {
                 line.push({
                     renderable: this,
-                    char: 'O',
+                    char: 'W',
                     color: 'water',
                 })
             }
             world.push(line);
+        }
+        const smaller = Math.min(height, width) - 2;
+        if (smaller > 4) {
+            const island = generateIsland(smaller);
+            const startY = Math.floor(height / 2 - smaller / 2);
+            const startX = Math.floor(width / 2 - smaller / 2);
+            for (let y = 0; y < smaller; y++) {
+                for (let x = 0; x < smaller; x++) {
+                    if (island[y][x]) {
+                        world[startY + y][startX + x] = {
+                            renderable: this,
+                            char: '.',
+                            color: 'sand',
+                        };
+                    }
+                }
+            }
         }
         return {
             pixels: world,
