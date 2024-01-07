@@ -35,6 +35,7 @@ export default class RenderFrame {
     }>;
     protected palette: Map<string, {fg: string, bg: string}> = new Map([
         ['water', {fg: 'white', bg: '#4298f5'}],
+        ['sand', {fg: '#f2c355', bg: '#ffe77d'}],
         ['empty', {fg: 'black', bg: 'black'}],
     ]);
 
@@ -66,7 +67,7 @@ export default class RenderFrame {
                             characterWidth, characterHeight
                         );
                         if (pixel.char) {
-                            this.renderContext.font = '14px "Courier", monospace';
+                            this.renderContext.font = '18px "Courier", monospace';
                             this.renderContext.fillStyle = colors?.fg ?? 'white';
                             this.renderContext.fillText(pixel.char, rx * characterWidth + 1, (ry + 1) * characterHeight - 3);
                         }
