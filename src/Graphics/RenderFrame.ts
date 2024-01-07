@@ -1,5 +1,5 @@
 const characterWidth = 14;
-const characterHeight = 20;
+const characterHeight = 18;
 
 export type BoundingBox = {
     start: [number, number],

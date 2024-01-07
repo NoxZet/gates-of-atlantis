@@ -30,13 +30,14 @@ export default class World {
             }
             world.push(line);
         }
-        const smaller = Math.min(height, width) - 2;
-        if (smaller > 4) {
-            const island = generateIsland(smaller);
-            const startY = Math.floor(height / 2 - smaller / 2);
-            const startX = Math.floor(width / 2 - smaller / 2);
-            for (let y = 0; y < smaller; y++) {
-                for (let x = 0; x < smaller; x++) {
+        const islandHeight = Math.min(height, Math.floor(width / 1.5)) - 2;
+        const islandWidth = Math.ceil(islandHeight * 1.5);
+        if (islandHeight > 4) {
+            const island = generateIsland(islandWidth, islandHeight);
+            const startX = Math.floor(width / 2 - islandWidth / 2);
+            const startY = Math.floor(height / 2 - islandHeight / 2);
+            for (let y = 0; y < islandHeight; y++) {
+                for (let x = 0; x < islandWidth; x++) {
                     if (island[y][x]) {
                         world[startY + y][startX + x] = {
                             renderable: this,

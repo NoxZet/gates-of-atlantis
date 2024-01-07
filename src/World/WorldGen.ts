@@ -8,37 +8,55 @@ function randomChoose<T>(arr: T[]) {
     return arr[Math.floor(Math.random() * arr.length)];
 }
 
-export function generateIsland(size: number): boolean[][] {
+export function generateIsland(width: number, height: number): boolean[][] {
     const island: number[][] = [];
-    for (let i = 0; i < size; i++) {
-        island.push(Array<number>(size).fill(NaN));
+    for (let i = 0; i < height; i++) {
+        island.push(Array<number>(width).fill(NaN));
     }
-    if (size % 2 === 0) {
-        size--;
-    }
-    // Size is always odd
+    const size: number = Math.max(width, height);
     const middle = Math.floor(size / 2);
-    island[middle][middle] = middle;
+    const middleY = Math.floor(height / 2);
+    const middleX = Math.floor(width / 2);
+    island[middleY][middleX] = middle;
+    // If one dimension is smaller, we want the pixel to fall off faster to reach shore value sooner
+    const xCoeff = middle / middleX;
+    const yCoeff = middle / middleY;
     for (let i = 1; i <= middle; i++) {
         // Grow to cardinal directions
         for (let [xoff, yoff] of [[-1, 0], [1, 0], [0, -1], [0, 1]]) {
-            const source = island[middle + (i - 1) * yoff][middle + (i - 1) * xoff];
-            const targetX = middle + i * xoff;
-            const targetY = middle + i * yoff;
-            const target = Math.min(distanceToEdge(size, targetX, targetY) * 1.3 + 0.01, source + randomChoose([1.3, -2.55]));
+            const targetX = middleX + i * xoff;
+            const targetY = middleY + i * yoff;
+            if (distanceToEdge(middle * 2, targetX * xCoeff, targetY * yCoeff) < 0) {
+                continue;
+            }
+            const coeff = (Math.abs(xoff * xCoeff) + Math.abs(yoff * yCoeff))
+            const source = island[middleY + (i - 1) * yoff][middleX + (i - 1) * xoff];
+            const target = Math.min(
+                // We transform the dimensions to a square
+                distanceToEdge(middle * 2, targetX * xCoeff, targetY * yCoeff) * 1.3 + 0.01,
+                source + randomChoose([1.3, -2.55]) * coeff
+            );
             island[targetY][targetX] = target;
         }
         // Grow the other points using the two neighbors
         for (let [xoff2m, yoff2m, max] of [[1, -1, i - 1], [-1, 1, i]]) {
             for (let [xoff, yoff] of [[-1, 0], [1, 0], [0, -1], [0, 1]]) {
+                const coeff = (Math.abs(xoff * xCoeff) + Math.abs(yoff * yCoeff))
                 for (let j = 1; j <= max; j++) {
+                    const targetX = middleX + i * xoff + j * xoff2m * yoff;
+                    const targetY = middleY + i * yoff + j * yoff2m * xoff;
+                    if (distanceToEdge(middle * 2, targetX * xCoeff, targetY * yCoeff) < 0) {
+                        continue;
+                    }
+                    // Avarge out both neighbors along x and y axis (there's always exactly 2)
                     const source = (
-                        island[middle + i * yoff + (j - 1) * yoff2m * xoff][middle + i * xoff + (j - 1) * xoff2m * yoff]
-                        + island[middle + (i - 1) * yoff + j * yoff2m * xoff][middle + (i - 1) * xoff + j * xoff2m * yoff]
+                        island[middleY + i * yoff + (j - 1) * yoff2m * xoff][middleX + i * xoff + (j - 1) * xoff2m * yoff]
+                        + island[middleY + (i - 1) * yoff + j * yoff2m * xoff][middleX + (i - 1) * xoff + j * xoff2m * yoff]
                     ) / 2;
-                    const targetX = middle + i * xoff + j * xoff2m * yoff;
-                    const targetY = middle + i * yoff + j * yoff2m * xoff;
-                    const target = Math.min(distanceToEdge(size, targetX, targetY) * 1.3 + 0.01, source + randomChoose([1.0, -2.15]));
+                    const target = Math.min(
+                        distanceToEdge(size, targetX * xCoeff, targetY * yCoeff) * 1.3 + 0.01,
+                        source + randomChoose([1.0, -2.15]) * coeff
+                    );
                     island[targetY][targetX] = target;
                 }
             }
